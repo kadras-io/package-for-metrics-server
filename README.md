@@ -2,58 +2,52 @@
 
 This project provides a [Carvel package](https://carvel.dev/kapp-controller/docs/latest/packaging) for [Metrics Server](https://github.com/kubernetes-sigs/metrics-server), a scalable and efficient source of container resource metrics for Kubernetes built-in autoscaling pipelines.
 
-## Components
-
-* Metrics Server
-
 ## Prerequisites
 
-* Install the [`kctrl`](https://carvel.dev/kapp-controller/docs/latest/install/#installing-kapp-controller-cli-kctrl) CLI to manage Carvel packages in a convenient way.
-* Ensure [kapp-controller](https://carvel.dev/kapp-controller) is deployed in your Kubernetes cluster. You can do that with Carvel
-[`kapp`](https://carvel.dev/kapp/docs/latest/install) (recommended choice) or `kubectl`.
+* Kubernetes 1.24+
+* Carvel [`kctrl`](https://carvel.dev/kapp-controller/docs/latest/install/#installing-kapp-controller-cli-kctrl) CLI.
+* Carvel [kapp-controller](https://carvel.dev/kapp-controller) deployed in your Kubernetes cluster. You can install it with Carvel [`kapp`](https://carvel.dev/kapp/docs/latest/install) (recommended choice) or `kubectl`.
 
-```shell
-kapp deploy -a kapp-controller -y \
-  -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
-```
+  ```shell
+  kapp deploy -a kapp-controller -y \
+    -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
+  ```
 
 ## Installation
 
-You can install the Metrics Server package directly or rely on the [Kadras package repository](https://github.com/arktonix/carvel-packages)
-(recommended choice).
+First, add the [Kadras package repository](https://github.com/arktonix/kadras-packages) to your Kubernetes cluster.
 
-Follow the [instructions](https://github.com/arktonix/carvel-packages) to add the Kadras package repository to your Kubernetes cluster.
+  ```shell
+  kubectl create namespace kadras-packages
+  kctrl package repository add -r kadras-repo \
+    --url ghcr.io/arktonix/kadras-packages \
+    -n kadras-packages
+  ```
 
-If you don't want to use the Kadras package repository, you can create the necessary `PackageMetadata` and
-`Package` resources for the Metrics Server package directly.
+Then, install the Metrics Server package.
 
-```shell
-kubectl create namespace carvel-packages
-kapp deploy -a metrics-server-package -n carvel-packages -y \
-    -f https://github.com/arktonix/package-for-metrics-server/releases/latest/download/metadata.yml \
-    -f https://github.com/arktonix/package-for-metrics-server/releases/latest/download/package.yml
-```
-
-Either way, you can then install the Metrics Server package using [`kctrl`](https://carvel.dev/kapp-controller/docs/latest/install/#installing-kapp-controller-cli-kctrl).
-
-```shell
-kctrl package install -i metrics-server \
+  ```shell
+  kctrl package install -i metrics-server \
     -p metrics-server.packages.kadras.io \
-    -v 0.6.1 \
-    -n carvel-packages
-```
+    -v 0.6.1+kadras.1 \
+    -n kadras-packages
+  ```
 
-You can retrieve the list of available versions with the following command.
+### Verification
 
-```shell
-kctrl package available list -p metrics-server.packages.kadras.io
-```
+You can verify the list of installed Carvel packages and their status.
 
-You can check the list of installed packages and their status as follows.
+  ```shell
+  kctrl package installed list -n kadras-packages
+  ```
 
-```shell
-kctrl package installed list -n carvel-packages
-```
+### Version
+
+You can get the list of Metrics Server versions available in the Kadras package repository.
+
+  ```shell
+  kctrl package available list -p metrics-server.packages.kadras.io -n kadras-packages
+  ```
 
 ## Configuration
 
@@ -71,25 +65,54 @@ The Metrics Server package has the following configurable properties.
 
 You can define your configuration in a `values.yml` file.
 
-```yaml
-metricsServer:
+  ```yaml
+  metricsServer:
     config:
-        securePort: 4443
-```
+      securePort: 4443
+  ```
 
 Then, reference it from the `kctrl` command when installing or upgrading the package.
 
-```shell
-kctrl package install -i metrics-server \
+  ```shell
+  kctrl package install -i metrics-server \
     -p metrics-server.packages.kadras.io \
-    -v 0.6.1 \
-    -n carvel-packages \
+    -v 0.6.1+kadras.1 \
+    -n kadras-packages \
     --values-file values.yml
-```
+  ```
 
-## Documentation
+## Upgrading
 
-For documentation specific to Metrics Server, check out [https://github.com/kubernetes-sigs/metrics-server](https://github.com/kubernetes-sigs/metrics-server).
+You can upgrade an existing package to a newer version using `kctrl`.
+
+  ```shell
+  kctrl package installed update -i metrics-server \
+    -v <new-version> \
+    -n kadras-packages
+  ```
+
+You can also update an existing package with a newer `values.yml` file.
+
+  ```shell
+  kctrl package installed update -i metrics-server \
+    -n kadras-packages \
+    --values-file values.yml
+  ```
+
+## Other
+
+The recommended way of installing the Metrics Server package is via the [Kadras package repository](https://github.com/arktonix/kadras-packages). If you prefer not using the repository, you can install the package by creating the necessary Carvel `PackageMetadata` and `Package` resources directly using [`kapp`](https://carvel.dev/kapp/docs/latest/install) or `kubectl`.
+
+  ```shell
+  kubectl create namespace kadras-packages
+  kapp deploy -a metrics-server-package -n kadras-packages -y \
+    -f https://github.com/arktonix/package-for-metrics-server/releases/latest/download/metadata.yml \
+    -f https://github.com/arktonix/package-for-metrics-server/releases/latest/download/package.yml
+  ```
+
+## Support and Documentation
+
+For support and documentation specific to Metrics Server, check out [https://github.com/kubernetes-sigs/metrics-server](https://github.com/kubernetes-sigs/metrics-server).
 
 ## References
 
