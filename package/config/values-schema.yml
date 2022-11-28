@@ -1,6 +1,5 @@
 #@data/values-schema
 
-#@schema/desc "OpenAPIv3 Schema for metrics-server"
 ---
 #@schema/desc "The namespace in which metrics-server is deployed"
 namespace: kube-system
