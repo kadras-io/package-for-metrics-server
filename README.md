@@ -1,5 +1,7 @@
 # Metrics Server
 
+<a href="https://slsa.dev/spec/v0.1/levels"><img src="https://slsa.dev/images/gh-badge-level3.svg" alt="The SLSA Level 3 badge"></a>
+
 This project provides a [Carvel package](https://carvel.dev/kapp-controller/docs/latest/packaging) for [Metrics Server](https://github.com/kubernetes-sigs/metrics-server), a scalable and efficient source of container resource metrics for Kubernetes built-in autoscaling pipelines.
 
 ## Prerequisites
@@ -29,7 +31,7 @@ Then, install the Metrics Server package.
   ```shell
   kctrl package install -i metrics-server \
     -p metrics-server.packages.kadras.io \
-    -v 0.6.1+kadras.1 \
+    -v 0.6.2 \
     -n kadras-packages
   ```
 
@@ -76,7 +78,7 @@ Then, reference it from the `kctrl` command when installing or upgrading the pac
   ```shell
   kctrl package install -i metrics-server \
     -p metrics-server.packages.kadras.io \
-    -v 0.6.1+kadras.1 \
+    -v 0.6.2 \
     -n kadras-packages \
     --values-file values.yml
   ```
@@ -120,6 +122,6 @@ This package is based on the original Metrics Server package used in [Tanzu Comm
 
 ## Supply Chain Security
 
-This project is compliant with level 2 of the [SLSA Framework](https://slsa.dev).
+This project is compliant with level 3 of the [SLSA Framework](https://slsa.dev).
 
-<img src="https://slsa.dev/images/SLSA-Badge-full-level2.svg" alt="The SLSA Level 2 badge" width=200>
+<img src="https://slsa.dev/images/SLSA-Badge-full-level3.svg" alt="The SLSA Level 3 badge" width=200>
