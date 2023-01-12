@@ -11,13 +11,13 @@ jobs:
       contents: write
       id-token: write
       packages: write
-    uses: arktonix/cloud-native-utils/.github/workflows/package-release.yml@main
+    uses: kadras-io/github-reusable-workflows/.github/workflows/package-release.yml@main
     with:
       package-name-slug: metrics-server
       package-name-display: Metrics Server
       registry-server: ghcr.io
       registry-username: ${{ github.actor }}
       image: ${{ github.repository }}
-      version: 0.6.2
+      version: 0.6.2+kadras.1
     secrets:
       pull-request-token: ${{ secrets.GH_ORG_PAT }}
