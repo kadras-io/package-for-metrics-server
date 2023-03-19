@@ -1,5 +1,5 @@
-#@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
 
 #! We are adding this overlay in the package to accomandate the need from vSphere supervisor cluster:
 #! `deployment.spec.strategy.type` is configured to `RollingUpdate`

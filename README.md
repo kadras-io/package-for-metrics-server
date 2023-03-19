@@ -1,10 +1,16 @@
 # Metrics Server
 
-<a href="https://slsa.dev/spec/v0.1/levels"><img src="https://slsa.dev/images/gh-badge-level3.svg" alt="The SLSA Level 3 badge"></a>
+![Test Workflow](https://github.com/kadras-io/package-for-kpack/actions/workflows/test.yml/badge.svg)
+![Release Workflow](https://github.com/kadras-io/package-for-kpack/actions/workflows/release.yml/badge.svg)
+[![The SLSA Level 3 badge](https://slsa.dev/images/gh-badge-level3.svg)](https://slsa.dev/spec/v0.1/levels)
+[![The Apache 2.0 license badge](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Follow us on Twitter](https://img.shields.io/static/v1?label=Twitter&message=Follow&color=1DA1F2)](https://twitter.com/kadrasIO)
 
-This project provides a [Carvel package](https://carvel.dev/kapp-controller/docs/latest/packaging) for [Metrics Server](https://github.com/kubernetes-sigs/metrics-server), a scalable and efficient source of container resource metrics for Kubernetes built-in autoscaling pipelines.
+A Carvel package for [Metrics Server](https://github.com/kubernetes-sigs/metrics-server), a scalable and efficient source of container resource metrics for Kubernetes built-in autoscaling pipelines.
 
-## Prerequisites
+## 🚀&nbsp; Getting Started
+
+### Prerequisites
 
 * Kubernetes 1.24+
 * Carvel [`kctrl`](https://carvel.dev/kapp-controller/docs/latest/install/#installing-kapp-controller-cli-kctrl) CLI.
@@ -12,48 +18,83 @@ This project provides a [Carvel package](https://carvel.dev/kapp-controller/docs
 
   ```shell
   kapp deploy -a kapp-controller -y \
-    -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
+    -f https://github.com/carvel-dev/kapp-controller/releases/latest/download/release.yml
   ```
 
-## Installation
+### Installation
 
-First, add the [Kadras package repository](https://github.com/kadras-io/kadras-packages) to your Kubernetes cluster.
+Add the Kadras [package repository](https://github.com/kadras-io/kadras-packages) to your Kubernetes cluster:
 
   ```shell
   kubectl create namespace kadras-packages
-  kctrl package repository add -r kadras-repo \
+  kctrl package repository add -r kadras-packages \
     --url ghcr.io/kadras-io/kadras-packages \
     -n kadras-packages
   ```
 
-Then, install the Metrics Server package.
+<details><summary>Installation without package repository</summary>
+The recommended way of installing the Metrics Server package is via the Kadras <a href="https://github.com/kadras-io/kadras-packages">package repository</a>. If you prefer not using the repository, you can add the package definition directly using <a href="https://carvel.dev/kapp/docs/latest/install"><code>kapp</code></a> or <code>kubectl</code>.
+
+  ```shell
+  kubectl create namespace kadras-packages
+  kapp deploy -a metrics-server-package -n kadras-packages -y \
+    -f https://github.com/kadras-io/package-for-metrics-server/releases/latest/download/metadata.yml \
+    -f https://github.com/kadras-io/package-for-metrics-server/releases/latest/download/package.yml
+  ```
+</details>
+
+Install the Metrics Server package:
 
   ```shell
   kctrl package install -i metrics-server \
     -p metrics-server.packages.kadras.io \
-    -v 0.6.2+kadras.1 \
+    -v ${VERSION} \
     -n kadras-packages
   ```
 
-### Verification
+> **Note**
+> You can find the `${VERSION}` value by retrieving the list of package versions available in the Kadras package repository installed on your cluster.
+> 
+>   ```shell
+>   kctrl package available list -p metrics-server.packages.kadras.io -n kadras-packages
+>   ```
 
-You can verify the list of installed Carvel packages and their status.
+Verify the installed packages and their status:
 
   ```shell
   kctrl package installed list -n kadras-packages
   ```
 
-### Version
+## 📙&nbsp; Documentation
 
-You can get the list of Metrics Server versions available in the Kadras package repository.
+Documentation, tutorials and examples for this package are available in the [docs](docs) folder.
+For documentation specific to Metrics Server, check out [github.com/kubernetes-sigs/metrics-server](https://github.com/kubernetes-sigs/metrics-server).
 
-  ```shell
-  kctrl package available list -p metrics-server.packages.kadras.io -n kadras-packages
+## 🎯&nbsp; Configuration
+
+The Metrics Server package can be customized via a `values.yml` file.
+
+  ```yaml
+  metricsServer:
+    config:
+      securePort: 4443
   ```
 
-## Configuration
+Reference the `values.yml` file from the `kctrl` command when installing or upgrading the package.
+
+  ```shell
+  kctrl package install -i metrics-server \
+    -p metrics-server.packages.kadras.io \
+    -v ${VERSION} \
+    -n kadras-packages \
+    --values-file values.yml
+  ```
+
+### Values
 
 The Metrics Server package has the following configurable properties.
+
+<details><summary>Configurable properties</summary>
 
 | Value | Required/Optional | Description |
 |-------|-------------------|-------------|
@@ -65,63 +106,16 @@ The Metrics Server package has the following configurable properties.
 | `metricsServer.config.probe.periodSeconds` | Optional | Probe period of metrics-server deployment. Default: `10` . |
 | `metricsServer.config.apiServiceInsecureTLS`| Optional | Whether to enable insecure TLS for metrics-server api service. Default: `True`. |
 
-You can define your configuration in a `values.yml` file.
+</details>
 
-  ```yaml
-  metricsServer:
-    config:
-      securePort: 4443
-  ```
+## 🛡️&nbsp; Security
 
-Then, reference it from the `kctrl` command when installing or upgrading the package.
+The security process for reporting vulnerabilities is described in [SECURITY.md](SECURITY.md).
 
-  ```shell
-  kctrl package install -i metrics-server \
-    -p metrics-server.packages.kadras.io \
-    -v 0.6.2+kadras.1 \
-    -n kadras-packages \
-    --values-file values.yml
-  ```
+## 🖊️&nbsp; License
 
-## Upgrading
+This project is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for more information.
 
-You can upgrade an existing package to a newer version using `kctrl`.
+## 🙏&nbsp; Acknowledgments
 
-  ```shell
-  kctrl package installed update -i metrics-server \
-    -v <new-version> \
-    -n kadras-packages
-  ```
-
-You can also update an existing package with a newer `values.yml` file.
-
-  ```shell
-  kctrl package installed update -i metrics-server \
-    -n kadras-packages \
-    --values-file values.yml
-  ```
-
-## Other
-
-The recommended way of installing the Metrics Server package is via the [Kadras package repository](https://github.com/kadras-io/kadras-packages). If you prefer not using the repository, you can install the package by creating the necessary Carvel `PackageMetadata` and `Package` resources directly using [`kapp`](https://carvel.dev/kapp/docs/latest/install) or `kubectl`.
-
-  ```shell
-  kubectl create namespace kadras-packages
-  kapp deploy -a metrics-server-package -n kadras-packages -y \
-    -f https://github.com/kadras-io/package-for-metrics-server/releases/latest/download/metadata.yml \
-    -f https://github.com/kadras-io/package-for-metrics-server/releases/latest/download/package.yml
-  ```
-
-## Support and Documentation
-
-For support and documentation specific to Metrics Server, check out [https://github.com/kubernetes-sigs/metrics-server](https://github.com/kubernetes-sigs/metrics-server).
-
-## References
-
-This package is based on the original Metrics Server package used in [Tanzu Community Edition](https://github.com/vmware-tanzu/community-edition) before its retirement.
-
-## Supply Chain Security
-
-This project is compliant with level 3 of the [SLSA Framework](https://slsa.dev).
-
-<img src="https://slsa.dev/images/SLSA-Badge-full-level3.svg" alt="The SLSA Level 3 badge" width=200>
+This package is inspired by the original kpack package used in the [Tanzu Community Edition](https://github.com/vmware-tanzu/community-edition) project before its retirement.
