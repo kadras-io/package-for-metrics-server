@@ -1,7 +1,7 @@
 #@ load("@ytt:data", "data")
-#@ load("@ytt:yaml", "yaml")
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:template", "template")
+#@ load("@ytt:yaml", "yaml")
 
 #@ def is_toleration_specified(toleration):
 #@   return toleration in yaml.decode(yaml.encode(data.values.metricsServer.config.tolerations))
@@ -14,7 +14,7 @@
 #@   default_tolerations += [{"effect":"NoSchedule", "key":"node-role.kubernetes.io/control-plane"}]
 #@ end
 
-#@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "metrics-server"}})
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"metrics-server"}})
 ---
 spec:
   #@overlay/match-child-defaults missing_ok=True

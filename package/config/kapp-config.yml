@@ -6,6 +6,7 @@ minimumRequiredVersion: 0.50.0
 #! Rebase rules explicitly define how kapp should merge resources during an update.
 #! See more about the resource merge method: https://carvel.dev/kapp/docs/latest/merge-method.
 rebaseRules:
+
   - path: [spec, caBundle]
     type: remove
     resourceMatchers:
