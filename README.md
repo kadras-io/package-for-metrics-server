@@ -117,4 +117,4 @@ This project is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE
 
 ## 🙏&nbsp; Acknowledgments
 
-This package is inspired by the original kpack package used in the [Tanzu Community Edition](https://github.com/vmware-tanzu/community-edition) project before its retirement.
+This package is inspired by the original metrics-server package used in the [Tanzu Community Edition](https://github.com/vmware-tanzu/community-edition) project before its retirement.
