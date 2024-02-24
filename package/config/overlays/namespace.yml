@@ -6,7 +6,7 @@
 #@ if hasattr(data.values.metricsServer, 'namespace') and data.values.metricsServer.namespace:
 #@   metricsServerNamespace = data.values.metricsServer.namespace
 #@ else:
-#@    metricsServerNamespace = data.values.namespace
+#@   metricsServerNamespace = data.values.namespace
 #@ end
 
 #@ if data.values.metricsServer.createNamespace:
