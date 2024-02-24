@@ -27,7 +27,7 @@ spec:
       containers:
       #@overlay/match by=overlay.subset({"name": "metrics-server"})
       - args:
-        #@overlay/match by=overlay.subset("--secure-port=4443")
+        #@overlay/match by=overlay.subset("--secure-port=10250")
         - #@ "--secure-port=" + str(data.values.metricsServer.config.securePort)
         #@overlay/append
         - --kubelet-insecure-tls
