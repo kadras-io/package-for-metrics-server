@@ -2,8 +2,8 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - githubRelease:
-      tag: v0.8.0
-      url: https://api.github.com/repos/kubernetes-sigs/metrics-server/releases/229645413
+      tag: v0.8.1
+      url: https://api.github.com/repos/kubernetes-sigs/metrics-server/releases/281050386
     path: .
   path: config/upstream
 kind: LockConfig

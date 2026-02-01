@@ -4,7 +4,7 @@ directories:
   - githubRelease:
       disableAutoChecksumValidation: true
       slug: kubernetes-sigs/metrics-server
-      tag: v0.8.0
+      tag: v0.8.1
     includePaths:
     - components.yaml
     path: .
