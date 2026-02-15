@@ -97,13 +97,21 @@ The Metrics Server package has the following configurable properties.
 
 | Value | Required/Optional | Description |
 |-------|-------------------|-------------|
-| `metricsServer.createNamespace` | Optional | Whether to create namespace specified for metrics-server. Default value is `true`. |
-| `metricsServer.namespace` | Optional | The namespace value used by older templates, will be overwriten if top level namespace is present, kept for backward compatibility. Default value is `null`. |
-| `metricsServer.config.securePort` | Optional | TThe HTTPS secure port used by metrics-server. Default: `4443`. |
-| `metricsServer.config.updateStrategy` | Optional | TThe update strategy of the metrics-server deployment. Default: `RollingUpdate` |
+| `namespace` | Optional | The namespace in which metrics-server is deployed. Default: `kube-system`. |
+| `nodeSelector` | Optional | NodeSelector configuration applied to all the deployments. |
+| `deployment.updateStrategy` | Optional | Update strategy of deployments. Default: `null`. |
+| `deployment.rollingUpdate.maxUnavailable` | Optional | The maxUnavailable of rollingUpdate. Applied only if RollingUpdate is used as updateStrategy. Default: `1`. |
+| `deployment.rollingUpdate.maxSurge` | Optional | The maxSurge of rollingUpdate. Applied only if RollingUpdate is used as updateStrategy. Default: `0`. |
+| `daemonset.updateStrategy` | Optional | Update strategy of daemonsets. Default: `null`. |
+| `metricsServer.namespace` | Optional | The namespace value used by older templates, will be overwriten if top level namespace is present, kept for backward compatibility. Default: `kube-system`. |
+| `metricsServer.createNamespace` | Optional | Whether to create namespace specified for metrics-server. Default: `true`. |
+| `metricsServer.config.securePort` | Optional | The HTTPS secure port used by metrics-server. Default: `4443`. |
+| `metricsServer.config.updateStrategy` | Optional | The update strategy of the metrics-server deployment. Default: `RollingUpdate`. |
+| `metricsServer.config.args` | Optional | Arguments passed into metrics-server container. Default: `[""]`. |
 | `metricsServer.config.probe.failureThreshold` | Optional | Probe failureThreshold of metrics-server deployment. Default: `3`. |
-| `metricsServer.config.probe.periodSeconds` | Optional | Probe period of metrics-server deployment. Default: `10` . |
-| `metricsServer.config.apiServiceInsecureTLS`| Optional | Whether to enable insecure TLS for metrics-server api service. Default: `True`. |
+| `metricsServer.config.probe.periodSeconds` | Optional | Probe period of metrics-server deployment. Default: `10`. |
+| `metricsServer.config.apiServiceInsecureTLS` | Optional | Whether to enable insecure TLS for metrics-server api service. Default: `true`. |
+| `metricsServer.config.tolerations` | Optional | Metrics-server deployment tolerations. Default: `[]`. |
 
 </details>
 
