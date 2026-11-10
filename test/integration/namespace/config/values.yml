@@ -11,7 +11,7 @@ stringData:
     kubelet:
       insecure_tls: true
     args:
-      metric-resolution: 10s
+      metric-resolution: 20s
     observability:
       logging:
         verbosity: 2
