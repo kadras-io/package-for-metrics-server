@@ -1,5 +1,0 @@
-# expected: a value <= 10
----
-observability:
-  logging:
-    verbosity: 11

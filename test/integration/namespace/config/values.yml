@@ -14,5 +14,5 @@ stringData:
       metric-resolution: 20s
     observability:
       logging:
-        verbosity: 2
+        level: debug
         format: text

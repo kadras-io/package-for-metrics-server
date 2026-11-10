@@ -5,11 +5,17 @@
 ```yaml
 observability:
   logging:
-    verbosity: 0
+    level: info
     format: json
 ```
 
-* `verbosity` is the [log verbosity](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-instrumentation/logging.md#what-method-to-use) of the Kubernetes components, from 0 to 10. 0 logs the essential messages, 2 the operational ones, like the scrapes of each Kubelet, and 4 or more debug messages.
+* `level` is one of `info`, `debug`, `trace`. They map to the [log verbosity](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-instrumentation/logging.md#what-method-to-use) 0, 4, and 6 of the Kubernetes components. `info` logs the essential messages, `debug` also the operational ones, like the scrapes of each Kubelet. For a specific verbosity, set the `v` flag via `args` (see [configuration.md](configuration.md)):
+
+```yaml
+args:
+  v: 2
+```
+
 * `format` is one of `text` and `json`.
 
 ## Metrics

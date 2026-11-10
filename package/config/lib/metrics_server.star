@@ -17,11 +17,15 @@ kubelet_ca_dir = "/etc/ssl/kubelet"
 # FLAGS
 # ###########
 
+# The log levels of the package, aligned with the other Kadras packages, and their Kubernetes log verbosity.
+# See: https://github.com/kubernetes/community/blob/master/contributors/devel/sig-instrumentation/logging.md
+_log_verbosities = {"info": 0, "debug": 4, "trace": 6}
+
 # The flags computed from the package values. `args` is merged on top of them.
 def server_args():
   logging = data.values.observability.logging
   args = {
-    "v": logging.verbosity,
+    "v": _log_verbosities[logging.level],
     "logging-format": logging.format,
   }
 

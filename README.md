@@ -12,7 +12,7 @@ A Carvel package for [Metrics Server](https://github.com/kubernetes-sigs/metrics
 
 * **Metrics API**. Metrics Server, registered in the Kubernetes API as `metrics.k8s.io`, configurable via its flags. It verifies the Kubelet serving certificates with the cluster certificate authority, or a custom one.
 * **High availability**. Optionally, multiple replicas spread across nodes and protected by a PodDisruptionBudget.
-* **Observability**. Structured logs with configurable verbosity.
+* **Observability**. Structured logs with configurable level.
 * **Security**. Metrics Server complies with the `restricted` [Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/), enforced on its namespace when created by the package, and mounts the service account token only where needed. Optionally, Kyverno verifies the signature of the Metrics Server image.
 
 ## 🚀&nbsp; Getting Started
@@ -144,7 +144,7 @@ The Metrics Server package has the following configurable properties.
 | `args` | `{}` | Container flags, merged on top of the ones computed by the package. Set a flag to null to remove it. See https://github.com/kubernetes-sigs/metrics-server/blob/master/docs/command-line-flags.txt. |
 | `kubelet.insecure_tls` | `false` | Whether to skip the verification of the Kubelet serving certificates. Only for clusters where they are self-signed, like kind and the default kubeadm setup. |
 | `kubelet.ca_cert_data` | `""` | PEM-encoded certificates of the certificate authority that signed the Kubelet serving certificates, when it's not the cluster one. |
-| `observability.logging.verbosity` | `0` | The log verbosity. 0 logs the essential messages, 2 the operational ones, and 4 or more debug messages. |
+| `observability.logging.level` | `"info"` | The log level: `info` for the essential messages, `debug` and `trace` for increasingly detailed ones. For a specific verbosity, set the `v` flag via `args`. |
 | `observability.logging.format` | `"json"` | The format of the logs. |
 | `policies.enabled` | `false` | Whether to include the Kyverno policies that validate and secure the package installation. They require Kyverno 1.19 or later. |
 

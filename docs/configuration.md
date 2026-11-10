@@ -4,7 +4,7 @@ The package values cover the decisions most installations need to make: namespac
 
 ## Container flags
 
-Metrics Server is configured via container flags. The package computes some of them from the values (log verbosity and format, Kubelet TLS) and merges them into the upstream ones, then merges `args` on top, so its flags take precedence. The flags are written without the leading dashes, and a flag set to `null` is removed.
+Metrics Server is configured via container flags. The package computes some of them from the values (log level and format, Kubelet TLS) and merges them into the upstream ones, then merges `args` on top, so its flags take precedence. The flags are written without the leading dashes, and a flag set to `null` is removed.
 
 ```yaml
 args:

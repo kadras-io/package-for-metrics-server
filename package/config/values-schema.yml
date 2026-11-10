@@ -43,9 +43,9 @@ kubelet:
 #@schema/desc "Settings for logs."
 observability:
   logging:
-    #@schema/desc "The log verbosity. 0 logs the essential messages, 2 the operational ones, and 4 or more debug messages."
-    #@schema/validation min=0, max=10
-    verbosity: 0
+    #@schema/desc "The log level: `info` for the essential messages, `debug` and `trace` for increasingly detailed ones. For a specific verbosity, set the `v` flag via `args`."
+    #@schema/validation one_of=["info", "debug", "trace"]
+    level: info
     #@schema/desc "The format of the logs."
     #@schema/validation one_of=["text", "json"]
     format: json
