@@ -1,0 +1,8 @@
+# expected: `kubelet.ca_cert_data` to be empty when `kubelet.insecure_tls` is true
+---
+kubelet:
+  insecure_tls: true
+  ca_cert_data: |
+    -----BEGIN CERTIFICATE-----
+    MIIBszCCAVmgAwIBAgIUZm9vYmFyYmF6cXV4MAoGCCqGSM49BAMCMBUxEzARBgNV
+    -----END CERTIFICATE-----

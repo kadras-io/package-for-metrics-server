@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: metrics-server-values
+  namespace: tests
+stringData:
+  values.yaml: |
+    # The kind Kubelets have self-signed serving certificates.
+    kubelet:
+      insecure_tls: true
+    policies:
+      enabled: true

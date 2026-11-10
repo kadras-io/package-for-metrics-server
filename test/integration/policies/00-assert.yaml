@@ -1,0 +1,28 @@
+# The Metrics Server image is verified by Kyverno before Metrics Server is admitted.
+---
+apiVersion: policies.kyverno.io/v1
+kind: NamespacedImageValidatingPolicy
+metadata:
+  name: metrics-server-verify-image
+  namespace: kube-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+  namespace: kube-system
+status:
+  readyReplicas: 1
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1beta1.metrics.k8s.io
+spec:
+  service:
+    name: metrics-server
+    namespace: kube-system
+status:
+  conditions:
+  - type: Available
+    status: "True"

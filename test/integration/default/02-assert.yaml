@@ -1,0 +1,8 @@
+---
+# The kube-system namespace isn't managed by the package, and is left untouched.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kube-system
+status:
+  phase: Active

@@ -1,0 +1,20 @@
+# Only the auth reader RoleBinding is left in kube-system.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: kube-system

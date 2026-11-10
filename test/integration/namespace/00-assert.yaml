@@ -1,0 +1,40 @@
+# Metrics Server runs in a custom namespace, created by the package.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+  namespace: monitoring
+status:
+  readyReplicas: 1
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1beta1.metrics.k8s.io
+spec:
+  service:
+    name: metrics-server
+    namespace: monitoring
+status:
+  conditions:
+  - type: Available
+    status: "True"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+---
+# The Role to read the authentication configuration of the API server is in kube-system.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: metrics-server-auth-reader
+  namespace: kube-system
+subjects:
+- kind: ServiceAccount
+  name: metrics-server
+  namespace: monitoring

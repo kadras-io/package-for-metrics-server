@@ -1,0 +1,5 @@
+---
+observability:
+  logging:
+    verbosity: 4
+    format: text

@@ -1,0 +1,12 @@
+---
+# The resource metrics of the nodes and Pods are served via the Metrics API, as used by `kubectl top`
+# and the autoscalers. They're available after the first scrapes of the Kubelets.
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - script: |
+      for i in $(seq 1 30); do
+        kubectl top nodes && kubectl top pods -n monitoring && exit 0
+        sleep 5
+      done
+      exit 1

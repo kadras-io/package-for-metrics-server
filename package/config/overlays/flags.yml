@@ -1,0 +1,25 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("/lib/metrics_server.star", "args_merger", "name", "secure_port_merger", "server_args")
+
+#! Metrics Server is configured via flags. The ones computed from the package values are merged
+#! into the upstream flags, then `args` is merged on top, so its flags take precedence.
+#! The container port follows the `--secure-port` flag, since the probes and the Service reference it by name.
+#! See: https://github.com/kubernetes-sigs/metrics-server/blob/master/docs/command-line-flags.txt
+
+#@ args = server_args()
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":name}})
+---
+spec:
+  template:
+    spec:
+      containers:
+        #@overlay/match by="name"
+        - name: #@ name
+          #@overlay/replace via=args_merger(args)
+          args:
+          ports:
+            #@overlay/match by="name"
+            - name: https
+              #@overlay/replace via=secure_port_merger(args)
+              containerPort:

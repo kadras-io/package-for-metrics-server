@@ -1,0 +1,11 @@
+---
+args:
+  metric-resolution: 30s
+  --kubelet-preferred-address-types: Hostname,InternalIP
+  # The container port follows the secure port.
+  secure-port: 4443
+  # An upstream flag can be removed.
+  kubelet-use-node-status-port: null
+  # A computed flag can be overridden.
+  logging-format: text
+  tls-min-version: VersionTLS13

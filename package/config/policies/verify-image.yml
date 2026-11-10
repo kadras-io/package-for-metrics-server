@@ -1,0 +1,52 @@
+#@ load("@ytt:data", "data")
+
+#@ if data.values.policies.enabled:
+---
+apiVersion: policies.kyverno.io/v1
+kind: NamespacedImageValidatingPolicy
+metadata:
+  name: metrics-server-verify-image
+  namespace: #@ data.values.namespace
+  annotations:
+    policies.kyverno.io/title: Verify Image
+    policies.kyverno.io/category: Software Supply Chain Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/minversion: 1.19.0
+    policies.kyverno.io/description: >-
+      Using the Cosign project, this policy checks all container images used by this package
+      to ensure they have been signed by the Kubernetes image promoter (keyless signing).
+spec:
+  webhookConfiguration:
+    timeoutSeconds: 30
+  #! Image verification only makes sense when Pods are admitted.
+  evaluation:
+    background:
+      enabled: false
+  validationActions:
+    - Deny
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+  matchImageReferences:
+    - glob: "registry.k8s.io/metrics-server/*"
+  attestors:
+    - name: cosign
+      cosign:
+        #! The images published on registry.k8s.io are signed with Cosign keyless by the Kubernetes image promoter,
+        #! and their signatures are recorded in the Rekor transparency log.
+        #! See: https://kubernetes.io/docs/tasks/administer-cluster/verify-signed-artifacts/
+        keyless:
+          identities:
+            - issuer: https://accounts.google.com
+              subject: krel-trust@k8s-releng-prod.iam.gserviceaccount.com
+        ctlog:
+          url: https://rekor.sigstore.dev
+  validations:
+    - expression: >-
+        images.containers.map(image, verifyImageSignatures(image, [attestors.cosign])).all(e, e > 0)
+      message: The Metrics Server images must be signed by the Kubernetes image promoter.
+#@ end

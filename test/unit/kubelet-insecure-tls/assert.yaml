@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+spec:
+  template:
+    spec:
+      (containers[?name == 'metrics-server'] | [0]):
+        (contains(args, '--kubelet-insecure-tls=true')): true
+        (args[?starts_with(@, '--kubelet-certificate-authority')] | length(@)): 0

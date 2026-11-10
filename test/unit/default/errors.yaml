@@ -1,0 +1,29 @@
+# The kube-system namespace isn't managed by the package.
+apiVersion: v1
+kind: Namespace
+---
+apiVersion: v1
+kind: ResourceQuota
+---
+# A single replica, without disruption budget.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+---
+# The Kubelet certificates are verified with the cluster certificate authority.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+spec:
+  template:
+    spec:
+      (containers[?name == 'metrics-server'] | [0]):
+        (args[?starts_with(@, '--kubelet-insecure-tls')] | length(@) > `0`): true
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: metrics-server-kubelet-ca
+---
+apiVersion: policies.kyverno.io/v1
+kind: NamespacedImageValidatingPolicy

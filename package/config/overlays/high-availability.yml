@@ -1,0 +1,43 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/lib/metrics_server.star", "name", "selector")
+
+#! With more than one replica, Metrics Server is deployed as in the upstream high-availability manifest:
+#! the replicas run on different nodes, are replaced one at a time, and at least one stays available during node drains.
+#! See: https://github.com/kubernetes-sigs/metrics-server#high-availability
+
+#@ replicas = data.values.replicas
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":name}})
+---
+spec:
+  #@overlay/match missing_ok=True
+  replicas: #@ replicas
+  #@ if replicas > 1:
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels: #@ selector
+            topologyKey: kubernetes.io/hostname
+  #@ end
+
+#@ if replicas > 1:
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: #@ name
+  namespace: #@ data.values.namespace
+  labels: #@ selector
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels: #@ selector
+#@ end

@@ -1,0 +1,3 @@
+---
+kubelet:
+  insecure_tls: true

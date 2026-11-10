@@ -1,0 +1,11 @@
+---
+# The namespace created by the package is deleted, and the API service unregistered.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1beta1.metrics.k8s.io

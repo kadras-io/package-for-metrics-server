@@ -1,0 +1,29 @@
+apiVersion: policies.kyverno.io/v1
+kind: NamespacedImageValidatingPolicy
+metadata:
+  name: metrics-server-verify-image
+  namespace: kube-system
+spec:
+  validationActions:
+  - Deny
+  matchImageReferences:
+  - glob: registry.k8s.io/metrics-server/*
+  attestors:
+  - name: cosign
+    cosign:
+      keyless:
+        identities:
+        - issuer: https://accounts.google.com
+          subject: krel-trust@k8s-releng-prod.iam.gserviceaccount.com
+      ctlog:
+        url: https://rekor.sigstore.dev
+---
+# The policy applies to the Metrics Server Pods, so it's created before them and deleted after them.
+apiVersion: policies.kyverno.io/v1
+kind: NamespacedImageValidatingPolicy
+metadata:
+  name: metrics-server-verify-image
+  annotations:
+    kapp.k14s.io/change-rule.upsert: upsert before upserting metrics-server.packages.kadras.io/server
+    kapp.k14s.io/change-rule.delete: delete after deleting metrics-server.packages.kadras.io/server
+  (annotations."kapp.k14s.io/change-group" == null): true

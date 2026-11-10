@@ -1,0 +1,99 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/lib/metrics_server.star", "name", "upstream_namespace")
+
+#! =============================================
+#! Pod Security Standards
+#! =============================================
+
+#! Metrics Server complies with the "restricted" Pod Security Standard. It's enforced on the package namespace,
+#! when created by the package. The `kube-system` namespace is left as it is, since it hosts other system components.
+#! See: https://kubernetes.io/docs/concepts/security/pod-security-standards/
+
+#@ if data.values.namespace != upstream_namespace:
+#@overlay/match by=overlay.subset({"kind":"Namespace"})
+---
+metadata:
+  #@overlay/match missing_ok=True
+  labels:
+    #@overlay/match missing_ok=True
+    pod-security.kubernetes.io/enforce: restricted
+    #@overlay/match missing_ok=True
+    pod-security.kubernetes.io/audit: restricted
+    #@overlay/match missing_ok=True
+    pod-security.kubernetes.io/warn: restricted
+#@ end
+
+#! =============================================
+#! Service Account Tokens
+#! =============================================
+
+#! The ServiceAccount auto-mounts its token, so all the containers of the Pod would get one.
+#! Instead, the token is mounted explicitly in the Metrics Server container, with the same projected volume
+#! Kubernetes would otherwise add. Metrics Server accesses the Kubernetes API to list the nodes and Pods.
+#! See: https://kyverno.io/policies/other/restrict-automount-sa-token/restrict-automount-sa-token/
+
+#@ kube_api_access = "kube-api-access"
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":name}})
+---
+spec:
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      automountServiceAccountToken: false
+      volumes:
+      #@overlay/append
+      - name: #@ kube_api_access
+        projected:
+          defaultMode: 420
+          sources:
+          - serviceAccountToken:
+              path: token
+              expirationSeconds: 3607
+          - configMap:
+              name: kube-root-ca.crt
+              items:
+              - key: ca.crt
+                path: ca.crt
+          - downwardAPI:
+              items:
+              - path: namespace
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+      containers:
+      #@overlay/match by="name"
+      - name: #@ name
+        volumeMounts:
+        #@overlay/append
+        - name: #@ kube_api_access
+          mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          readOnly: true
+
+#! =============================================
+#! Priority
+#! =============================================
+
+#! Metrics Server runs with the `system-cluster-critical` priority class, as upstream, since the autoscalers depend on it.
+#! Some clusters only allow it in `kube-system`, so a ResourceQuota allows it in a custom package namespace.
+#! See: https://kubernetes.io/docs/concepts/policy/resource-quotas/#limit-priority-class-consumption-by-default
+
+#@ if data.values.namespace != upstream_namespace:
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: critical-pods
+  namespace: #@ data.values.namespace
+spec:
+  hard:
+    pods: "1000"
+  scopeSelector:
+    matchExpressions:
+    - operator: In
+      scopeName: PriorityClass
+      values:
+      - system-node-critical
+      - system-cluster-critical
+#@ end

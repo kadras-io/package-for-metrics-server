@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+spec:
+  template:
+    spec:
+      (containers[?name == 'metrics-server'] | [0]):
+        args:
+        - --cert-dir=/tmp
+        - --secure-port=4443
+        - --kubelet-preferred-address-types=Hostname,InternalIP
+        - --metric-resolution=30s
+        - --v=0
+        - --logging-format=text
+        - --tls-min-version=VersionTLS13
+        (ports[?name == 'https'] | [0].containerPort): 4443

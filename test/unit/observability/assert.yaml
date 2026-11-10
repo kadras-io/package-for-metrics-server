@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+spec:
+  template:
+    spec:
+      (containers[?name == 'metrics-server'] | [0]):
+        (contains(args, '--v=4')): true
+        (contains(args, '--logging-format=text')): true

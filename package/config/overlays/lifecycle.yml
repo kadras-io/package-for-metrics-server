@@ -1,0 +1,41 @@
+#@ load("@ytt:overlay", "overlay")
+
+#! The APIService registers Metrics Server in the Kubernetes API. While it's unavailable, the API discovery
+#! reports an error for the `metrics.k8s.io` group, which affects clients like `kubectl` and the namespace controller.
+#! So, it's created after Metrics Server is running, and deleted before it stops.
+#! The Kyverno policies, instead, are created before Metrics Server, so that they apply to its Pods,
+#! and deleted after it.
+#! See: https://carvel.dev/kapp/docs/latest/apply-ordering/
+
+#@ server = "metrics-server.packages.kadras.io/server"
+#@ api_service = overlay.subset({"kind":"APIService"})
+#@ policies = overlay.subset({"apiVersion":"policies.kyverno.io/v1"})
+#@ resources = overlay.subset({"metadata":{}})
+
+#@overlay/match by=overlay.and_op(resources, overlay.not_op(overlay.or_op(api_service, policies))), expects="1+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  annotations:
+    #@overlay/match missing_ok=True
+    kapp.k14s.io/change-group: #@ server
+
+#@overlay/match by=api_service
+---
+metadata:
+  #@overlay/match missing_ok=True
+  annotations:
+    #@overlay/match missing_ok=True
+    kapp.k14s.io/change-rule.upsert: #@ "upsert after upserting " + server
+    #@overlay/match missing_ok=True
+    kapp.k14s.io/change-rule.delete: #@ "delete before deleting " + server
+
+#@overlay/match by=policies, expects="0+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  annotations:
+    #@overlay/match missing_ok=True
+    kapp.k14s.io/change-rule.upsert: #@ "upsert before upserting " + server
+    #@overlay/match missing_ok=True
+    kapp.k14s.io/change-rule.delete: #@ "delete after deleting " + server

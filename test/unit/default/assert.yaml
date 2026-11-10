@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+  namespace: kube-system
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    spec:
+      priorityClassName: system-cluster-critical
+      automountServiceAccountToken: false
+      imagePullSecrets:
+      - name: canonical-registry-credentials
+      (volumes[?name == 'kube-api-access'] | length(@)): 1
+      (affinity == null): true
+      (containers[?name == 'metrics-server'] | [0]):
+        args:
+        - --cert-dir=/tmp
+        - --secure-port=10250
+        - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+        - --kubelet-use-node-status-port
+        - --metric-resolution=15s
+        - --v=0
+        - --logging-format=json
+        (ports[?name == 'https'] | [0].containerPort): 10250
+        (volumeMounts[?name == 'kube-api-access'] | length(@)): 1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: metrics-server
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-server
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: metrics-server-auth-reader
+  namespace: kube-system
+subjects:
+- name: metrics-server
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:metrics-server
+subjects:
+- name: metrics-server
+  namespace: kube-system
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1beta1.metrics.k8s.io
+  annotations:
+    # The APIService is registered after Metrics Server runs, and unregistered before it stops.
+    kapp.k14s.io/change-rule.upsert: upsert after upserting metrics-server.packages.kadras.io/server
+    kapp.k14s.io/change-rule.delete: delete before deleting metrics-server.packages.kadras.io/server
+spec:
+  service:
+    name: metrics-server
+    namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: canonical-registry-credentials
+  namespace: kube-system

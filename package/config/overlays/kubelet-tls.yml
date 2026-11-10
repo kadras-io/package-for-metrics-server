@@ -1,0 +1,38 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("/lib/metrics_server.star", "kubelet_ca_dir", "name")
+
+#! Metrics Server verifies the Kubelet serving certificates with the cluster certificate authority.
+#! When they're signed by a different one, its certificates are mounted, and referenced by the
+#! `--kubelet-certificate-authority` flag (see lib/metrics_server.star).
+#! When they're self-signed, the verification can be skipped via `kubelet.insecure_tls`.
+#! See: https://github.com/kubernetes-sigs/metrics-server#requirements
+
+#@ if data.values.kubelet.ca_cert_data:
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: metrics-server-kubelet-ca
+  namespace: #@ data.values.namespace
+type: Opaque
+stringData:
+  ca.crt: #@ data.values.kubelet.ca_cert_data
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":name}})
+---
+spec:
+  template:
+    spec:
+      containers:
+        #@overlay/match by="name"
+        - name: #@ name
+          volumeMounts:
+          - name: kubelet-ca
+            mountPath: #@ kubelet_ca_dir
+            readOnly: true
+      volumes:
+      - name: kubelet-ca
+        secret:
+          secretName: metrics-server-kubelet-ca
+#@ end

@@ -1,63 +1,37 @@
 #@ load("@ytt:data", "data")
 #@ load("@ytt:overlay", "overlay")
-#@ load("@ytt:yaml", "yaml")
+#@ load("/lib/metrics_server.star", "upstream_namespace")
 
-#@ metricsServerNamespace = ""
-#@ if hasattr(data.values.metricsServer, 'namespace') and data.values.metricsServer.namespace:
-#@   metricsServerNamespace = data.values.metricsServer.namespace
-#@ else:
-#@   metricsServerNamespace = data.values.namespace
-#@ end
+#! Metrics Server runs in the package namespace, which is created by the package unless it's `kube-system`.
+#! The RoleBinding granting access to the authentication configuration of the API server stays in `kube-system`,
+#! where that configuration and the Role to read it are.
+#! See: https://kubernetes.io/docs/tasks/extend-kubernetes/configure-aggregation-layer/#authentication-flow
 
-#@ if data.values.metricsServer.createNamespace:
+#@ namespace = data.values.namespace
+
+#@ if namespace != upstream_namespace:
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: #@ metricsServerNamespace
-#@   if data.values.namespace == "kube-system":
-  annotations:
-    kapp.k14s.io/delete-strategy: orphan
-#@   end
+  name: #@ namespace
 #@ end
 
-#@overlay/match by=overlay.subset({"kind": "ServiceAccount","metadata": {"name": "metrics-server"}}),expects="1+"
+#@ auth_reader = overlay.subset({"kind":"RoleBinding", "metadata":{"name":"metrics-server-auth-reader"}})
+
+#@overlay/match by=overlay.and_op(overlay.subset({"metadata":{"namespace":upstream_namespace}}), overlay.not_op(auth_reader)), expects="1+"
 ---
 metadata:
-  namespace: #@ metricsServerNamespace
+  namespace: #@ namespace
 
-#@overlay/match by=overlay.subset({"kind": "RoleBinding","metadata": {"name": "metrics-server-auth-reader"}}),expects="1+"
----
-metadata:
-  namespace: #@ metricsServerNamespace
-subjects:
-#@overlay/match by=overlay.subset({"kind": "ServiceAccount"}),expects="1+"
-- namespace: #@ metricsServerNamespace
-
-#@overlay/match by=overlay.subset({"kind": "ClusterRoleBinding","metadata": {"name": "metrics-server:system:auth-delegator"}}),expects="1+"
+#@overlay/match by=overlay.or_op(overlay.subset({"kind":"ClusterRoleBinding"}), overlay.subset({"kind":"RoleBinding"})), expects="1+"
 ---
 subjects:
-#@overlay/match by=overlay.subset({"kind": "ServiceAccount"}),expects="1+"
-- namespace: #@ metricsServerNamespace
+#@overlay/match by=overlay.subset({"kind":"ServiceAccount"}), expects="1+"
+- namespace: #@ namespace
 
-#@overlay/match by=overlay.subset({"kind": "ClusterRoleBinding","metadata": {"name": "system:metrics-server"}}),expects="1+"
----
-subjects:
-#@overlay/match by=overlay.subset({"kind": "ServiceAccount"}),expects="1+"
-- namespace: #@ metricsServerNamespace
-
-#@overlay/match by=overlay.subset({"kind":"Service","metadata":{"name": "metrics-server"}})
----
-metadata:
-  namespace: #@ metricsServerNamespace
-
-#@overlay/match by=overlay.subset({"kind":"Deployment","metadata":{"name": "metrics-server"}})
----
-metadata:
-  namespace: #@ metricsServerNamespace
-
-#@overlay/match by=overlay.subset({"kind":"APIService","metadata":{"name": "v1beta1.metrics.k8s.io"}})
+#@overlay/match by=overlay.subset({"kind":"APIService"})
 ---
 spec:
   service:
-    namespace: #@ metricsServerNamespace
+    namespace: #@ namespace

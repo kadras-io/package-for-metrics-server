@@ -6,4 +6,6 @@ metadata:
   namespace: tests
 stringData:
   values.yaml: |
-    # Default configuration
+    # The kind Kubelets have self-signed serving certificates.
+    kubelet:
+      insecure_tls: true
